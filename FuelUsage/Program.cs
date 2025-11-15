@@ -32,6 +32,11 @@ namespace FuelUsage
                 Console.WriteLine("Neispravan datum!");
                 return;
             }
+            else if (birthDate > DateTime.Now)
+            {
+                Console.WriteLine("Datum je neispravan!");
+                return;
+            }
 
 
 
@@ -127,6 +132,11 @@ namespace FuelUsage
                         Console.WriteLine("Neispravan datum!");
                         return;
                     }
+                    else if (birthDate > DateTime.Now)
+                    {
+                        Console.WriteLine("Datum je neispravan!");
+                        return;
+                    }
 
 
                     userToEdit["Name"] = newName;
@@ -189,12 +199,37 @@ namespace FuelUsage
                         ShowUsers();
                         break;
                     case 0:
-                        exit = true;
                         break;
                 }
             } while (!exit);
         }
-
+        public static void IntiUsers()
+        {
+            users.Add(new Dictionary<string, object>
+            {
+                {"ID", 1L },
+                {"Name", "Ivan" },
+                {"Surname", "Ivić" },
+                {"DateOfBirth", new DateTime(1995, 5, 15) },
+                {"trips", new List<Dictionary<string, object>>() }
+            });
+            users.Add(new Dictionary<string, object>
+            {
+                {"ID", 2L },
+                {"Name", "Ana" },
+                {"Surname", "Anić" },
+                {"DateOfBirth", new DateTime(1992, 2, 22) },
+                {"trips", new List<Dictionary<string, object>>() }
+            });
+            users.Add(new Dictionary<string, object>
+            {
+                {"ID", 3L },
+                {"Name", "Marko" },
+                {"Surname", "Markić" },
+                {"DateOfBirth", new DateTime(1988, 8, 8) },
+                {"trips", new List<Dictionary<string, object>>() }
+            });
+        }
 
 
         
@@ -227,6 +262,12 @@ namespace FuelUsage
                 Console.WriteLine("Neispravan datum!");
                 return;
             }
+            else if (travelDate > DateTime.Now)
+            {
+                Console.WriteLine("Datum je neispravan!");
+                return;
+            }
+
 
             double mileage;
             if (!double.TryParse(mileageInput, out mileage) || mileage < 0)
@@ -347,9 +388,14 @@ namespace FuelUsage
                         Console.WriteLine("Neispravan datum!");
                         return;
                     }
+                    else if(newDate > DateTime.Now)
+                    {
+                        Console.WriteLine("Datum je neispravan!");
+                        return;
+                    }
 
 
-                    Console.WriteLine("Unesi novu kilometražu: ");
+                        Console.WriteLine("Unesi novu kilometražu: ");
                     var newMileageInput = Console.ReadLine();
                     if (string.IsNullOrEmpty(newMileageInput))
                     {
@@ -485,14 +531,95 @@ namespace FuelUsage
                 case "g":
                     SortedDescendingByDate();
                     break;
+                case "0":
+                    break;
             }
         }
+        public static void TotalFuelConsumption()
+        {
+            double totalConsumption = travels.Sum(t => (double)t["FuelQuantity"]);
+            Console.WriteLine("Ukupna potrošnja goriva: {0} litara", totalConsumption);
+        }
+        public static void TotalFuelCost()
+        {
+            double totalCost = travels.Sum(t => (double)t["TotalFuelCost"]);
+            Console.WriteLine("Ukupni trošak goriva: {0}", totalCost);
+        }
+        public static void AverageFuelConsumption()
+        {
+            double totalMileage = travels.Sum(t => (double)t["Mileage"]);
+            double totalFuel = travels.Sum(t => (double)t["FuelQuantity"]);
+            double averageConsumption = (totalFuel / totalMileage) * 100;
+            Console.WriteLine("Prosječna potrošnja goriva: {0} L/100km", averageConsumption);
+        }
+        public static void TravelWithHighestFuelConsumption()
+        {
+            var travel = travels.OrderByDescending(t => (double)t["FuelQuantity"] / (double)t["Mileage"]).FirstOrDefault();
+            if (travel != null)
+            {
+                double consumption = ((double)travel["FuelQuantity"] / (double)travel["Mileage"]) * 100;
+                Console.WriteLine("Putovanje s najvećom potrošnjom goriva je putovanje #{0} s potrošnjom od {1} L/100km", travel["ID"], consumption);
+            }
+            else
+            {
+                Console.WriteLine("Nema unesenih putovanja.");
+            }
+        }
+        public static void TravelsByDate()
+        {
+            Console.WriteLine("Unesite datum za pregled putovanja: ");
+            var dateInput = Console.ReadLine();
+            DateTime date;
+            if (!DateTime.TryParse(dateInput, out date))
+            {
+                Console.WriteLine("Neispravan datum!");
+                return;
+            }
+            var travelsOnDate = travels.Where(t => ((DateTime)t["Date"]).Date == date.Date).ToList();
+            if (travelsOnDate.Count > 0)
+            {
+                Console.WriteLine("Putovanja na datum {0}:", date.ToString("dd.MM.yyyy"));
+                foreach (var travel in travelsOnDate)
+                {
+                    Console.WriteLine("Putovanje #{0} - Kilometraža: {1}, Količina goriva: {2}, Cijena goriva po litri: {3}, Ukupna cijena goriva: {4}", travel["ID"], travel["Mileage"], travel["FuelQuantity"], travel["FuelPrice"], travel["TotalFuelCost"]);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Nema putovanja na uneseni datum.");
+            }
+        }
+        public static void ReportsAndAnalysis()
+        {
+            Console.WriteLine("IZVJEŠTAJI I ANALIZE");
+            Console.WriteLine("a) Ukupna potrošnja goriva(zbroj svih litara)");
+            Console.WriteLine("b) Ukupni trošak goriva(zbroj svih goriva*cijena)");
+            Console.WriteLine("c) Prosječna potrošnja goriva u L/100km");
+            Console.WriteLine("d) Putovanje s njavećom potrošnjom goriva");
+            Console.WriteLine("e) Pregled putovanja po određenom datumu");
 
-        //ReportsAndAnalysis();
-
-
-
-
+            var input = Console.ReadLine();
+            switch (input)
+            {
+                case "a":
+                    TotalFuelConsumption();
+                    break;
+                case "b":
+                    TotalFuelCost();
+                    break;
+                case "c":
+                    AverageFuelConsumption();
+                    break;
+                case "d":
+                    TravelWithHighestFuelConsumption();
+                    break;
+                case "e":
+                    TravelsByDate();
+                    break;
+                case "0":
+                    break;
+            }
+        }
         public static void TravelMenu()
         {
             Console.WriteLine("MENI PUTOVANJA");
@@ -522,17 +649,67 @@ namespace FuelUsage
                     ShowTravelsMenu();
                     break;
                 case 5:
+                    ReportsAndAnalysis();
                     break;
                 case 0:
-                    exit = true;
                     break;
 
             }
         }
+        public static void InitTravels()
+        {
+            travels.Add(new Dictionary<string, object>
+            {
+                {"ID", 1 },
+                {"Date", new DateTime(2023, 1, 15) },
+                {"Mileage", 150.0 },
+                {"FuelQuantity", 10.0 },
+                {"FuelPrice", 1.5 },
+                {"TotalFuelCost", 15.0 }
+            });
+            travels.Add(new Dictionary<string, object>
+            {
+                {"ID", 2 },
+                {"Date", new DateTime(2023, 2, 20) },
+                {"Mileage", 200.0 },
+                {"FuelQuantity", 12.0 },
+                {"FuelPrice", 1.6 },
+                {"TotalFuelCost", 19.2 }
+            });
+            travels.Add(new Dictionary<string, object>
+            {
+                {"ID", 3 },
+                {"Date", new DateTime(2023, 3, 10) },
+                {"Mileage", 300.0 },
+                {"FuelQuantity", 20.0 },
+                {"FuelPrice", 1.4 },
+                {"TotalFuelCost", 28.0 }
+            });
+            travels.Add(new Dictionary<string, object>
+            {
+                {"ID", 4 },
+                {"Date", new DateTime(2023, 4, 5) },
+                {"Mileage", 250.0 },
+                {"FuelQuantity", 15.0 },
+                {"FuelPrice", 1.55 },
+                {"TotalFuelCost", 23.25 }
+            });
+            travels.Add(new Dictionary<string, object>
+            {
+                {"ID", 5 },
+                {"Date", new DateTime(2023, 5, 18) },
+                {"Mileage", 180.0 },
+                {"FuelQuantity", 11.0 },
+                {"FuelPrice", 1.45 },
+                {"TotalFuelCost", 15.95 }
+            });
+        }
 
         static void Main(string[] args)
         {
-            
+            InitTravels();
+            IntiUsers();
+
             do
             {
                 Console.WriteLine("APLIKACIJA ZA EVIDENCIJU GORIVA");
