@@ -705,6 +705,122 @@ namespace FuelUsage
             });
         }
 
+
+
+        public static void HighestSpendingUser()
+        {
+            Console.WriteLine("KORISNIK S NAJVEĆOM POTROŠNJOM GORIVA");
+            Dictionary<string, object> highestSpendingUser = null;
+            double highestSpending = 0;
+            foreach (var user in users)
+            {
+                var userTravels = (List<Dictionary<string, object>>)user["trips"];
+                double totalSpending = userTravels.Sum(t => (double)t["TotalFuelCost"]);
+                if (totalSpending > highestSpending)
+                {
+                    highestSpending = totalSpending;
+                    highestSpendingUser = user;
+                }
+            }
+            if (highestSpendingUser != null)
+            {
+                Console.WriteLine("Korisnik: {0} {1}, Ukupna potrošnja goriva: {2}", highestSpendingUser["Name"], highestSpendingUser["Surname"], highestSpending);
+            }
+            else
+            {
+                Console.WriteLine("Nema unesenih korisnika ili putovanja.");
+            }
+        }
+        public static void UserWithMostTravels()
+        {
+            Console.WriteLine("KORISNIK S NAJVIŠE PUTOVANJA");
+            Dictionary<string, object> mostTravelsUser = null;
+            int maxTravels = 0;
+            foreach (var user in users)
+            {
+                var userTravels = (List<Dictionary<string, object>>)user["trips"];
+                int travelCount = userTravels.Count;
+                if (travelCount > maxTravels)
+                {
+                    maxTravels = travelCount;
+                    mostTravelsUser = user;
+                }
+            }
+            if (mostTravelsUser != null)
+            {
+                Console.WriteLine("Korisnik: {0} {1}, Broj putovanja: {2}", mostTravelsUser["Name"], mostTravelsUser["Surname"], maxTravels);
+            }
+            else
+            {
+                Console.WriteLine("Nema unesenih korisnika ili putovanja.");
+            }
+        }
+        public static void AverageTravelsPerUser()
+        {
+            Console.WriteLine("PROSJEČAN BORJ PUTOVANJA PO KORISNIKU");
+            if (users.Count == 0)
+            {
+                Console.WriteLine("Nema unesenih korisnika.");
+                return;
+            }
+            int totalTravels = 0;
+            foreach (var user in users)
+            {
+                var userTravels = (List<Dictionary<string, object>>)user["trips"];
+                totalTravels += userTravels.Count;
+            }
+            double averageTravels = (double)totalTravels / users.Count;
+            Console.WriteLine("Prosječan broj putovanja po korisniku: {0}", averageTravels);
+        }
+        public static void TotalKilometersAllUsers()
+        {
+            Console.WriteLine("UKUPAN BROJ PRIJEĐENIH KILOMETERA SVIH KORISNIKA");
+            var totalKilometers = 0.0;
+            foreach(var user in users)
+            {
+                var userTravels = (List<Dictionary<string, object>>)user["trips"];
+                totalKilometers += userTravels.Sum(t => (double)t["Mileage"]);
+            }
+            Console.WriteLine("Ukupan broj prijeđenih kilometara svih korisnika: {0} km", totalKilometers);
+        }
+        public static void Statistics()
+        {
+            Console.WriteLine("STATISTIKA");
+            Console.WriteLine("1 - Korisnik s najvećim ukupnim troškom goriva");
+            Console.WriteLine("2 - Korisnik s najviše putovanja");
+            Console.WriteLine("3 - Prosječan broj putovanja po korisniku");
+            Console.WriteLine("4 - Ukupan broj prijeđenih kilometara svih korisnika");
+
+            if (int.TryParse(Console.ReadLine(), out int input))
+            {
+                Console.WriteLine("Odabir: {0}", input);
+            }
+            else
+            {
+                Console.WriteLine("Neispravan unos");
+                return;
+            }
+            switch (input)
+            {
+                case 1:
+                    HighestSpendingUser();
+                    break;
+                case 2:
+                    UserWithMostTravels();
+                    break;
+                case 3:
+                    AverageTravelsPerUser();
+                    break;
+                case 4:
+                    TotalKilometersAllUsers();
+                    break;
+                case 0:
+                    break;
+            }
+
+        }
+
+
         static void Main(string[] args)
         {
             InitTravels();
@@ -734,6 +850,9 @@ namespace FuelUsage
                         break;
                     case 2:
                         TravelMenu();
+                        break;
+                    case 3:
+                        Statistics();
                         break;
                     case 0:
                         exit = true;
